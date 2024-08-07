@@ -18,7 +18,7 @@ const App = () => {
 
   const handleRun = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/run", {
+      const response = await axios.post("https://ide-o0uf.onrender.com/run", {
         code,
         language,
       });
