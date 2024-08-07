@@ -4,7 +4,7 @@ const DebuggingConsole = ({ messages }) => {
   return (
     <div
       style={{
-        height: "20vh",
+        height: "200px",
         overflow: "auto",
         backgroundColor: "#1e1e1e",
         color: "#fff",

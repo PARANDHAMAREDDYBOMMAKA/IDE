@@ -16,7 +16,12 @@ const TerminalComponent = () => {
     return () => terminal.dispose();
   }, []);
 
-  return <div ref={terminalRef} style={{ height: "100%" }} />;
+  return (
+    <div
+      ref={terminalRef}
+      style={{ height: "200px", backgroundColor: "black", color: "white" }}
+    />
+  );
 };
 
 export default TerminalComponent;

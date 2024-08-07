@@ -1,73 +1,70 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const axios = require("axios");
+const { exec } = require("child_process");
 
 const app = express();
 const port = 8000;
-
-// JDoodle API credentials
-const JDoodleClientID = "cda27eea8cc9b2e64958b0422244e4f0";
-const JDoodleClientSecret =
-  "9b5fa8febd628a4440711e7a7f6d638c0f50a591c3e7f607a47055b4b39834d3";
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Endpoint to run code
-app.post("/run", async (req, res) => {
+app.post("/run", (req, res) => {
   const { code, language } = req.body;
-  console.log(`Request received: ${JSON.stringify(req.body)}`);
 
   if (!code || !language) {
     return res.status(400).json({ error: "Code and language are required" });
   }
 
-  // Language mappings for JDoodle
-  const languageMappings = {
-    javascript: "nodejs",
-    python: "python3",
-    php: "php",
-    java: "java",
-    cpp: "cpp",
-    c: "c",
-    typescript: "typescript",
-    ruby: "ruby",
-    csharp: "csharp",
-    r: "r",
-    swift: "swift",
-  };
-
-  const languageID = languageMappings[language];
-  if (!languageID) {
-    return res.status(400).json({ error: "Unsupported language" });
+  let command;
+  switch (language) {
+    case "python":
+      command = `python3 -c "${code.replace(/"/g, '\\"')}"`;
+      break;
+    case "javascript":
+      command = `node -e "${code.replace(/"/g, '\\"')}"`;
+      break;
+    case "java":
+      command = `echo '${code}' > Main.java && javac Main.java && java Main`;
+      break;
+    case "cpp":
+      command = `echo '${code}' > main.cpp && g++ main.cpp -o main && ./main`;
+      break;
+    case "php":
+      command = `php -r "${code.replace(/"/g, '\\"')}"`;
+      break;
+    case "typescript":
+      command = `ts-node -e "${code.replace(/"/g, '\\"')}"`;
+      break;
+    case "ruby":
+      command = `ruby -e "${code.replace(/"/g, '\\"')}"`;
+      break;
+    case "c":
+      command = `echo '${code}' > main.c && gcc main.c -o main && ./main`;
+      break;
+    case "csharp":
+      command = `echo '${code}' > Program.cs && mcs Program.cs && mono Program.exe`;
+      break;
+    case "r":
+      command = `Rscript -e "${code.replace(/"/g, '\\"')}"`;
+      break;
+    case "swift":
+      command = `swift -e "${code.replace(/"/g, '\\"')}"`;
+      break;
+    default:
+      return res.status(400).json({ error: "Unsupported language" });
   }
 
-  try {
-    const response = await axios.post("https://api.jdoodle.com/v1/execute", {
-      script: code,
-      language: languageID,
-      versionIndex: "0",
-      clientId: JDoodleClientID,
-      clientSecret: JDoodleClientSecret,
-    });
-
-    const { output, error } = response.data;
-
+  exec(command, (error, stdout, stderr) => {
     if (error) {
-      console.error(`Execution error: ${error}`);
-      return res.status(400).json({ error: `Execution error: ${error}` });
+      res.status(400).json({ error: `Execution error: ${stderr}` });
+    } else {
+      res.json({ output: stdout });
     }
-
-    res.json({ output });
-  } catch (error) {
-    console.error(`Request error: ${error.message}`);
-    res.status(400).json({ error: `Request error: ${error.message}` });
-  }
+  });
 });
 
-// Start server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
