@@ -23,6 +23,7 @@ app.post("/run", (req, res) => {
       command = `python3 -c "${code.replace(/"/g, '\\"')}"`;
       break;
     case "javascript":
+    case "nodejs":
       command = `node -e "${code.replace(/"/g, '\\"')}"`;
       break;
     case "java":
