@@ -1,0 +1,18 @@
+datasource db {
+  provider = "postgresql" // Change to your database provider
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model File {
+  id        Int      @id @default(autoincrement())
+  name      String
+  content   String?
+  type      String   // Ensure this is present
+  parentId  Int?     // This field holds the reference to the parent file/folder
+  parent    File?    @relation("ParentFolder", fields: [parentId], references: [id]) // Define the relation to the parent
+  children  File[]   @relation("ParentFolder") // Define the relation for children
+}
