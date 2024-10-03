@@ -1,6 +1,6 @@
 datasource db {
-  provider = "postgresql" // Change to your database provider
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url = env("DATABASE_URL") // uses connection pooling
 }
 
 generator client {
